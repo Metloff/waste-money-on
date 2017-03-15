@@ -7,3 +7,9 @@ class Object
     !blank?
   end
 end
+
+class String
+  def standartize
+    self.strip.mb_chars.downcase
+  end
+end
