@@ -1,12 +1,11 @@
-require '../models/transaction'
+require '../models/minus_transaction'
 require '../models/user'
 
 
 class MessageDispatcher
   attr_reader :message
   def initialize(message)
-    @message = message
-    @changeMessage = Struct.new(:sign, :amount, :title, :category)    
+    @message = message   
   end
 
   def run
@@ -15,15 +14,6 @@ class MessageDispatcher
     return if self.user.blank?
 
     self.respond
-    # case self.text
-    # when 'Cтатистика'          then self.show_statistic
-    # when 'Месяц'               then self.month
-    # when 'Сезон'               then self.seson
-    # when 'Год'                 then self.year
-    # else self.parse
-    # end
-      
-    # puts self.text
   end
   
   protected
@@ -49,9 +39,9 @@ class MessageDispatcher
       self.year          ## TODO: Выводит стастистику за Год
     end
 
-    on /(\d{0,})(.*)#(.*)?/ do
+    on /(?<amount>\d{0,})(?<title>.*)#(?<category>.*)?/ do |arr|
       self.parse(arr)
-    end  
+    end
   end
 
   def on regexp, &block
@@ -64,17 +54,17 @@ class MessageDispatcher
   
   def parse(arr)
     return if arr.blank?
-    return if arr.length > 1
+    return if arr.length < 1
 
+    transaction = MinusTransaction.new(amount: arr[:amount], title: arr[:title].to_s.standartize, category: arr[:category].to_s.standartize)
 
-    puts arr.inspect
+    if transaction.save
+      ## TODO: Сообщить о сохранении данных
+    else
+      ## TODO: Сообщить об ошибке      
+      puts transaction.errors.messages
+    end
   end
-
-  def reg_exp
-    # @reg_exp ||=  /(-|\+)(\s?)(\d{0,})(\s?)([a-zA-Z--.,]*\s?)+/
-      @reg_exp ||=  /(-|\+)\s?(\d{0,})(.*)#(.*)?/
-  end
-  
   
   def text
     return @text if defined?(@text)
@@ -94,5 +84,4 @@ class MessageDispatcher
 
     @user = User.find_or_create_user(from)
   end
-  
 end
