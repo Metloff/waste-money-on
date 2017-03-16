@@ -1,5 +1,6 @@
 require '../models/minus_transaction'
 require '../models/user'
+require '../lib/message_sender.rb'
 
 
 class MessageDispatcher
@@ -62,7 +63,8 @@ class MessageDispatcher
       ## TODO: Сообщить о сохранении данных
     else
       ## TODO: Сообщить об ошибке      
-      puts transaction.errors.messages
+      # puts transaction.errors.messages
+      ::MessageSender.new(self.user, {text: 'Не удалось сохранить операцию. Попробуйте снова.'}).send
     end
   end
   
